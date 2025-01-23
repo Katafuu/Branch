@@ -19,30 +19,29 @@ class Farmer(models.Model):
         validators=[MinValueValidator(-180), MaxValueValidator(180)], 
         null=True, blank=True
     )
-
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
 class Buyer(models.Model):
     name = models.CharField(max_length=30)
     email = models.EmailField()
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
-    ]
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
 
     def __str__(self):
         return f"{self.name}"
 
 class Market(Buyer):
     siege_number = models.IntegerField()
-    market_name = models.CharField
+    market_name = models.CharField(max_length=100)
+
 
 class Personal(Buyer):
-    age = models.PositiveIntegerField(MinValueValidator(18), MaxValueValidator(99))
-    gender = models.CharField(max_length=50)
+    age = models.PositiveIntegerField(validators=[MinValueValidator(18), MaxValueValidator(99)])
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+    ]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     latitude = models.DecimalField(
         max_digits=9, decimal_places=6, 
         validators=[MinValueValidator(-90), MaxValueValidator(90)], 
@@ -53,3 +52,6 @@ class Personal(Buyer):
         validators=[MinValueValidator(-180), MaxValueValidator(180)], 
         null=True, blank=True
     )
+
+    def __str__(self):
+        return f"{self.name} ({self.gender}, Age: {self.age})"
