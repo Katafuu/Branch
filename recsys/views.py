@@ -1,3 +1,10 @@
+from django.shortcuts import render, get_object_or_404
+
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse("Test")                                                               
+# Create your views here.
 from django.shortcuts import render
 from .models import Farmer, Market, Personal, Product
 from geopy.distance import geodesic
@@ -137,14 +144,18 @@ def calculate_personal_buyer_score(farmer, buyer):
 
     return score
 
-def match_farmer_to_market(farmer):
+def match_farmer_to_market(request, farmer_id):
+    farmer = get_object_or_404(Farmer, id=farmer_id)
     buyers = Market.objects.all()
     buyer_scores = [(buyer, calculate_market_buyer_score(farmer, buyer)) for buyer in buyers]
     buyer_scores.sort(key=lambda item: item[1], reverse=True)  # Sort by highest score
-    return buyer_scores
+    return HttpResponse(', '.join(buyer_scores))
 
-def match_farmer_to_personal(farmer):
+def match_farmer_to_personal(request, farmer_id):
+    farmer = Farmer.objects.get(id=farmer_id)
     buyers = Personal.objects.all()
     buyer_scores = [(buyer, calculate_personal_buyer_score(farmer, buyer)) for buyer in buyers]
     buyer_scores.sort(key = lambda item: item [1], reverse = True)
-    return buyer_scores
+    return HttpResponse(', '.join(buyer_scores))
+
+
