@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'basemodels.apps.BasemodelsConfig',
     'recsys.apps.RecsysConfig',
     'django.contrib.admin',
     'django.contrib.auth',

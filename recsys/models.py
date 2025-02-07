@@ -3,18 +3,14 @@ from django.db import models
 # Create your models here.
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from basemodels.models import ProductBase, FarmerBase, BuyerBase
 
 # Create your models here.
 
-class Product(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+class Product(ProductBase):
+    pass
 
-
-class Farmer(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    region = models.CharField(max_length=30)#I think we can make the region a many to many field, tho we ll need a data base
-#Tho we ll need a table with all possible regions
+class Farmer(FarmerBase):
     latitude = models.DecimalField(
         max_digits=9, decimal_places=6, 
         validators=[MinValueValidator(-90), MaxValueValidator(90)], 
@@ -39,12 +35,8 @@ class Farmer(models.Model):
 
     FREQUENCY_CHOICES = [('Weekly', 'weekly'), ('Annually', 'annually'), ('Daily', 'daily'), ('Monthly', 'monthly')]
     supply_frequency = models.CharField(max_length=20, default='weekly', choices=FREQUENCY_CHOICES)
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
 
-class Buyer(models.Model):
-    name = models.CharField(max_length=30)
-    email = models.EmailField()
+class Buyer(BuyerBase):
     latitude = models.DecimalField(
         max_digits=9, decimal_places=6, 
         validators=[MinValueValidator(-90), MaxValueValidator(90)], 
@@ -65,10 +57,6 @@ class Buyer(models.Model):
     FREQUENCY_CHOICES = [('Weekly', 'weekly'), ('Annually', 'annually'), ('Daily', 'daily'), ('Monthly', 'monthly')]
     order_frequency = models.CharField(max_length=20, default='weekly', choices=FREQUENCY_CHOICES)
     can_arrange_transport = models.BooleanField(default=False)
-
-
-    def __str__(self):
-        return f"{self.name}"
 
 class Market(Buyer):
     siege_number = models.IntegerField()
