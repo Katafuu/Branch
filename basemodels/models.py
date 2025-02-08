@@ -3,6 +3,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class ProductBase(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    def __str__(self):
+        return f'{self.name}'
 
 class FarmerBase(models.Model):
     first_name = models.CharField(max_length=30)

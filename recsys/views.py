@@ -51,17 +51,19 @@ def get_matched_buyer(request, farmed_id):
 # │       Criteria            │ Personal Buyer    │ Market Buyer      │
 # ├───────────────────────────┼───────────────────┼───────────────────┤
 # │ Product Match             │ 0.3 (30%)       │ 0.2 (20%)         │
-# │ Order Quantity            │ 0.1 (10%)        │ 0.3 (30%)       │
-# │ Distance                  │ 0.25 (25%)       │ 0.2 (10%)         │
+# │ Order Quantity            │ 0.1 (10%)        │ 0.35 (30%)       │
+# │ Distance                  │ 0.25 (25%)       │ 0.15 (10%)         │
 # │ Buyer Type Match          │ 0.15 (15%)      │ 0.05 (5%)         │
 # │ Payment Terms Match       │ 0.1 (10%)        │ 0.1 (10%)         │
 # └───────────────────────────┴───────────────────┴───────────────────┘
 
 def score_productmatch(farmer, buyer):
     farmer_products = set(farmer.products.values_list('id', flat=True))
-    buyer_products = set(buyer.products.values_list('id', flat=True))
+    buyer_products = set(buyer.preferred_products.values_list('id', flat=True))
 
     matched_products = farmer_products.intersection(buyer_products)
+    if(matched_products == 0):
+        return -9999
 
     return len(matched_products)/len(farmer_products) #returns a ratio of how much matches
 
@@ -87,33 +89,33 @@ def score_distance(farmer, buyer):
 
     distance = geodesic(farmer_location, buyer_location).km
 
-    if distance <= farmer.delivery_radius:
+    if distance <= farmer.delivery_region:
         return 1
     elif buyer.can_arrange_transport:
         return 0.8
     else:
-        return max(0, 1 - (distance / (farmer.delivery_radius * 2))) 
+        return max(0, 1 - (distance / (farmer.delivery_region * 2))) 
     
 def score_buyer_type(farmer, buyer):
-    if farmer.preferred_buyer_type == 'both':
+    if farmer.buyer_choice == 'both':
         return 1
-    if farmer.preferred_buyer_type == 'personal' and isinstance(buyer, Personal):
+    if farmer.buyer_choice == 'personal' and isinstance(buyer, Personal):
         return 1
-    if farmer.preferred_buyer_type == 'market' and isinstance(buyer, Market):
+    if farmer.buyer_choice == 'market' and isinstance(buyer, Market):
         return 1
     return 0
 
 def score_payment_terms(farmer, buyer):
     if farmer.payment_terms == 'any' or buyer.payment_terms == 'any':
         return 1  
-    return 1 if farmer.payment_terms == buyer.payment_terms else 0
+    return 1 if farmer.payment_terms == buyer.payment_terms else -999
 
 
 def calculate_market_buyer_score(farmer, buyer):
     weights = {
         "product": 0.2,
-        "quantity": 0.3,
-        "distance": 0.2,
+        "quantity": 0.35,
+        "distance": 0.15,
         "buyer_type": 0.05,
         "payment": 0.1,
     }
@@ -149,13 +151,19 @@ def match_farmer_to_market(request, farmer_id):
     buyers = Market.objects.all()
     buyer_scores = [(buyer, calculate_market_buyer_score(farmer, buyer)) for buyer in buyers]
     buyer_scores.sort(key=lambda item: item[1], reverse=True)  # Sort by highest score
-    return HttpResponse(', '.join(buyer_scores))
+    output = ''
+    for item in buyer_scores:
+        output += f'{item[0].name}, {item[1]}'
+    return HttpResponse(output)
 
 def match_farmer_to_personal(request, farmer_id):
     farmer = Farmer.objects.get(id=farmer_id)
     buyers = Personal.objects.all()
     buyer_scores = [(buyer, calculate_personal_buyer_score(farmer, buyer)) for buyer in buyers]
     buyer_scores.sort(key = lambda item: item [1], reverse = True)
-    return HttpResponse(', '.join(buyer_scores))
+    output = ''
+    for item in buyer_scores:
+        output += f'{item[0].name}, {item[1]}'
+    return HttpResponse(output)
 
 
