@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 
 def index(request):
-    return HttpResponse("Test")                                                               
+    return HttpResponse("testing", request)                                                       
 # Create your views here.
 from django.shortcuts import render
 from .models import Farmer, Market, Personal, Product
@@ -50,11 +50,11 @@ def get_matched_buyer(request, farmed_id):
 # ┌───────────────────────────┬───────────────────┬───────────────────┐
 # │       Criteria            │ Personal Buyer    │ Market Buyer      │
 # ├───────────────────────────┼───────────────────┼───────────────────┤
-# │ Product Match             │ 0.3 (30%)       │ 0.2 (20%)         │
-# │ Order Quantity            │ 0.1 (10%)        │ 0.35 (30%)       │
-# │ Distance                  │ 0.25 (25%)       │ 0.15 (10%)         │
-# │ Buyer Type Match          │ 0.15 (15%)      │ 0.05 (5%)         │
-# │ Payment Terms Match       │ 0.1 (10%)        │ 0.1 (10%)         │
+# │ Product Match             │ 0.3 (30%)         │ 0.2 (20%)         │
+# │ Order Quantity            │ 0.1 (10%)         │ 0.35 (30%)        │
+# │ Distance                  │ 0.25 (25%)        │ 0.15 (10%)        │
+# │ Buyer Type Match          │ 0.15 (15%)        │ 0.05 (5%)         │
+# │ Payment Terms Match       │ 0.1 (10%)         │ 0.1 (10%)         │
 # └───────────────────────────┴───────────────────┴───────────────────┘
 
 def score_productmatch(farmer, buyer):

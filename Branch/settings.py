@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9_jk2+5!9+*rjl&io9l3l3i$br9&rclh#c@8cxysjn%%=uo22f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'home.apps.HomeConfig',
     'basemodels.apps.BasemodelsConfig',
     'recsys.apps.RecsysConfig',
     'django.contrib.admin',
