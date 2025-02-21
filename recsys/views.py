@@ -1,6 +1,8 @@
-from django.shortcuts import render, get_object_or_404
-
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Farmer, Market, Personal, Product
 from django.http import HttpResponse
+from .forms import FarmerForm, MarketForm, PersonalForm, ProductForm
+from django.db.models import Count
 
 def index(request):
     return HttpResponse("testing", request)                                                       
@@ -62,7 +64,7 @@ def score_productmatch(farmer, buyer):
     buyer_products = set(buyer.preferred_products.values_list('id', flat=True))
 
     matched_products = farmer_products.intersection(buyer_products)
-    if(matched_products == 0):
+    if((matched_products == 0) or (not farmer_products)):
         return -9999
 
     return len(matched_products)/len(farmer_products) #returns a ratio of how much matches
@@ -149,21 +151,113 @@ def calculate_personal_buyer_score(farmer, buyer):
 def match_farmer_to_market(request, farmer_id):
     farmer = get_object_or_404(Farmer, id=farmer_id)
     buyers = Market.objects.all()
+    
     buyer_scores = [(buyer, calculate_market_buyer_score(farmer, buyer)) for buyer in buyers]
     buyer_scores.sort(key=lambda item: item[1], reverse=True)  # Sort by highest score
-    output = ''
-    for item in buyer_scores:
-        output += f'{item[0].name}, {item[1]}'
-    return HttpResponse(output)
+
+    recommended = buyer_scores[:3]  # Get top 3 matches
+
+    return render(request, 'recsys/recommended_matches.html', {
+        'instance': farmer,
+        'recommended': recommended,
+    })
 
 def match_farmer_to_personal(request, farmer_id):
-    farmer = Farmer.objects.get(id=farmer_id)
+    farmer = get_object_or_404(Farmer, id=farmer_id)
     buyers = Personal.objects.all()
+    
     buyer_scores = [(buyer, calculate_personal_buyer_score(farmer, buyer)) for buyer in buyers]
-    buyer_scores.sort(key = lambda item: item [1], reverse = True)
-    output = ''
-    for item in buyer_scores:
-        output += f'{item[0].name}, {item[1]}'
-    return HttpResponse(output)
+    buyer_scores.sort(key=lambda item: item[1], reverse=True)  # Sort by highest score
+
+    recommended = buyer_scores[:3]  # Get top 3 matches
+
+    return render(request, 'recsys/recommended_matches.html', {
+        'instance': farmer,
+        'recommended': recommended,
+    })
 
 
+def add_farmer(request):
+    if request.method == "POST":
+        form = FarmerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Redirect to a success page
+    else:
+        form = FarmerForm()
+    return render(request, 'recsys/add_farmer.html', {'form': form})
+
+def add_market(request):
+    if request.method == "POST":
+        form = MarketForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Redirect to a success page
+    else:
+        form = MarketForm()
+    return render(request, 'recsys/add_market.html', {'form': form})
+
+def add_personal(request):
+    if request.method == "POST":
+        form = PersonalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Redirect to a success page
+    else:
+        form = PersonalForm()
+    return render(request, 'recsys/add_personal.html', {'form': form})
+
+def add_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Redirect to a success page
+    else:
+        form = ProductForm()
+    return render(request, 'recsys/add_product.html', {'form': form})
+
+
+def main_page(request):
+    # Get top 5 for each model (adjust based on your recommendation logic)
+    top_farmers = Farmer.objects.all()[:5]
+    top_markets = Market.objects.all()[:5]
+    top_personals = Personal.objects.all()[:5]
+    top_products = Product.objects.all()[:5]
+
+    return render(request, 'recsys/main_page.html', {
+        'top_farmers': top_farmers,
+        'top_markets': top_markets,
+        'top_personals': top_personals,
+        'top_products': top_products
+    })
+
+def match_market_to_farmers(request, market_id):
+    market = get_object_or_404(Market, id=market_id)
+    farmers = Farmer.objects.all()
+
+    farmer_scores = [(farmer, calculate_market_buyer_score(farmer, market)) for farmer in farmers]
+    farmer_scores.sort(key=lambda item: item[1], reverse=True)  
+
+    recommended = farmer_scores[:3]  
+
+    return render(request, 'recsys/recommended_matches.html', {
+        'instance': market,
+        'recommended': recommended,
+    })
+
+
+# ✅ Match a personal buyer to farmers
+def match_personal_to_farmers(request, personal_id):
+    personal_buyer = get_object_or_404(Personal, id=personal_id)
+    farmers = Farmer.objects.all()
+
+    farmer_scores = [(farmer, calculate_personal_buyer_score(farmer, personal_buyer)) for farmer in farmers]
+    farmer_scores.sort(key=lambda item: item[1], reverse=True)  
+
+    recommended = farmer_scores[:3]  
+
+    return render(request, 'recsys/recommended_matches.html', {
+        'instance': personal_buyer,
+        'recommended': recommended,
+    })

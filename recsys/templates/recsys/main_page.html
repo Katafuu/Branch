@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <style>
+        .tab {
+            display: inline-block;
+            margin-right: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: lightgray;
+        }
+        .tab-content {
+            display: none;
+        }
+        .active-tab {
+            background-color: #cccccc;
+        }
+        .top-right-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .top-right-buttons a {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: #28a745; /* Green button */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .top-right-buttons a:hover {
+            background-color: #218838; /* Darker green */
+        }
+        .bottom-center-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            background-color: #007bff; /* Blue button */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .bottom-center-button:hover {
+            background-color: #0056b3; /* Darker blue */
+        }
+    </style>
+</head>
+<body>
+    <h1>Main Page</h1>
+
+    <div>
+        <div class="tab" id="farmerTab" onclick="showTab('farmer')">Farmers</div>
+        <div class="tab" id="marketTab" onclick="showTab('market')">Markets</div>
+        <div class="tab" id="personalTab" onclick="showTab('personal')">Personal Buyers</div>
+    </div>
+
+    <div id="farmerContent" class="tab-content">
+        <h2>Top 5 Farmers</h2>
+        <ul>
+            {% for farmer in top_farmers %}
+                <li>{{ farmer.first_name }} {{ farmer.last_name }} - <a href="{% url 'match_farmer_to_market' farmer_id=farmer.id %}">View Recommendations</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="marketContent" class="tab-content">
+        <h2>Top 5 Markets</h2>
+        <ul>
+            {% for market in top_markets %}
+                <li>{{ market.market_name }} - <a href="{% url 'match_market_to_farmers' market_id=market.id %}">View Recommendations</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="personalContent" class="tab-content">
+        <h2>Top 5 Personal Buyers</h2>
+        <ul>
+            {% for personal in top_personals %}
+                <li>{{ personal.name }} - <a href="{% url 'match_personal_to_farmers' personal_id=personal.id %}">View Recommendations</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="top-right-buttons">
+        <a href="{% url 'add_farmer' %}">Add Farmer</a>
+        <a href="{% url 'add_product' %}">Add Product</a>
+        <a href="{% url 'add_personal' %}">Add Personal Buyer</a>
+        <a href="{% url 'add_market' %}">Add Market Buyer</a>
+    </div>
+
+    <a href="https://my-branch.com" class="bottom-center-button" target="_blank">Visit My Branch</a>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab content
+            let tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.style.display = 'none');
+
+            // Remove active class from all tabs
+            let tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active-tab'));
+
+            // Show the clicked tab's content
+            document.getElementById(tabName + 'Content').style.display = 'block';
+
+            // Add active class to clicked tab
+            document.getElementById(tabName + 'Tab').classList.add('active-tab');
+        }
+
+        // Default tab
+        showTab('farmer');
+    </script>
+</body>
+</html>

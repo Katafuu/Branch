@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Matches</title>
+</head>
+<body>
+    <h1>Recommended Matches for {{ instance.name }} {{instance.first_name}} {{instance.last_name}}</h1> <!-- For Market -->
+    <!-- or for others like Farmer -->
+    <!-- <h1>Recommended Matches for {{ instance.first_name }} {{ instance.last_name }}</h1> -->
+
+    <h2>Top 3 Matches</h2>
+    <ul id="recclist">
+        {% for match, score in recommended %}
+            {% if match.market_name %}
+                <li>(Market) {{ match.market_name }} - {{ score|floatformat:2 }}</li> 
+            {% elif match.first_name and match.last_name %}
+                <li>(Personal) {{ match.first_name }} {{ match.last_name }} - {{ score|floatformat:2 }}</li>
+            {% elif match.name %}
+                <li>(Farmer) {{ match.name }} - {{ score|floatformat:2 }}</li>
+            {% else %}
+                <li>Unknown Match - {{ score|floatformat:2 }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <br>
+    <a href="{% url 'main_page' %}">Back to Main Page</a>
+</body>
+</html>
